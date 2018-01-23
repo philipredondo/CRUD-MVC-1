@@ -1,0 +1,169 @@
+/*
+http://www.zachhunter.com/2015/11/xlsx-template-with-epplus-and-web-api-save-as-xlsx-or-pdf/
+http://www.c-sharpcorner.com/forums/copy-a-page-froma-worksheet-to-new-excel-in-epplus
+https://docs.microsoft.com/en-us/dotnet/csharp/programming-guide/file-system/how-to-copy-delete-and-move-files-and-folders
+https://www.e-iceblue.com/Tutorials/Spire.XLS/Spire.XLS-Program-Guide/Convert-Excel-to-PDF-Excel-to-PDF-in-C-VB.NET.html
+*/
+
+
+using OfficeOpenXml;
+using OfficeOpenXml.Style;
+using Spire.Pdf;
+using Spire.Xls;
+using Spire.Xls.Converter;
+using System;
+using System.IO;
+using System.Web; 
+
+namespace WebApplication1
+{
+    public partial class Default : System.Web.UI.Page
+    {
+        protected void Page_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        protected void ExportExcel_Click(object sender, EventArgs e)
+        {
+            var students = new[]   
+            {  
+                new {  
+                    Id = "101", Name = "Vivek", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "102", Name = "Ranjeet", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "103", Name = "Sharath", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "104", Name = "Ganesh", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "105", Name = "Gajanan", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "106", Name = "Ashish", Address = "Hyderabad"  
+                }  
+            };
+
+            ExcelPackage excel = new ExcelPackage();
+            var workSheet = excel.Workbook.Worksheets.Add("Sheet1");
+            workSheet.TabColor = System.Drawing.Color.Black;
+            workSheet.DefaultRowHeight = 12;
+            //Header of table  
+            //  
+            workSheet.Row(1).Height = 20;
+            workSheet.Row(1).Style.HorizontalAlignment = ExcelHorizontalAlignment.Center;
+            workSheet.Row(1).Style.Font.Bold = true;
+            workSheet.Cells[1, 1].Value = "S.No";
+            workSheet.Cells[1, 2].Value = "Id";
+            workSheet.Cells[1, 3].Value = "Name";
+            workSheet.Cells[1, 4].Value = "Address";
+            //Body of table  
+            //  
+            int recordIndex = 2;
+            foreach (var student in students)
+            {
+                workSheet.Cells[recordIndex, 1].Value = (recordIndex - 1).ToString();
+                workSheet.Cells[recordIndex, 2].Value = student.Id;
+                workSheet.Cells[recordIndex, 3].Value = student.Name;
+                workSheet.Cells[recordIndex, 4].Value = student.Address;
+                recordIndex++;
+            }
+            workSheet.Column(1).AutoFit();
+            workSheet.Column(2).AutoFit();
+            workSheet.Column(3).AutoFit();
+            workSheet.Column(4).AutoFit();
+            string excelName = "studentsRecord";
+            using (var memoryStream = new MemoryStream())
+            {
+                Response.ContentType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+                Response.AddHeader("content-disposition", "attachment; filename=" + excelName + ".xlsx");
+                excel.SaveAs(memoryStream);
+                memoryStream.WriteTo(Response.OutputStream);
+                Response.Flush();
+                Response.End();
+            }
+        }
+
+        protected void ExportExcelXX_Click(object sender, EventArgs e)
+        {
+            var students = new[]   
+            {  
+                new {  
+                    Id = "101", Name = "Vivek", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "102", Name = "Ranjeet", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "103", Name = "Sharath", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "104", Name = "Ganesh", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "105", Name = "Gajanan", Address = "Hyderabad"  
+                },  
+                new {  
+                    Id = "106", Name = "Ashish", Address = "Hyderabad"  
+                }  
+            };
+
+            string sourcePath = Context.Server.MapPath("/Excel/Template.xlsx");
+            string targetPath = Context.Server.MapPath("/Excel/TEMP/");
+
+            // Set the file name and get the output directory
+            var fileName = "Example-CRM-" + DateTime.Now.ToString("yyyy-MM-dd--hh-mm-ss") + ".xlsx";
+            string destFile = System.IO.Path.Combine(targetPath, fileName);
+
+            // overwrite the destination file if it already exists.
+            //System.IO.File.Copy(sourcePath, destFile, true);
+
+           
+            var outputDir = Context.Server.MapPath("/Excel/");
+
+            // Create the file using the FileInfo object
+            var file = new FileInfo(destFile);
+
+            ExcelPackage package = new ExcelPackage(file);
+            // add a new worksheet to the empty workbook
+            var workSheet = package.Workbook.Worksheets.Add("Sheet1");
+
+            int recordIndex = 2;
+            foreach (var student in students)
+            {
+                workSheet.Cells["A4"].Value = student.Name;
+                recordIndex++;
+            }
+
+            // save our new workbook and we are done!
+            package.Save();
+
+
+            // Spire.XLS to open XLSX workbook stream created by EPPlus
+            Workbook workbook = new Workbook();
+            workbook.LoadFromFile(destFile);
+
+            // Set PDF template
+            PdfDocument pdfDocument = new PdfDocument();
+            pdfDocument.PageSettings.Orientation = PdfPageOrientation.Landscape;
+            pdfDocument.PageSettings.Width = 970;
+            pdfDocument.PageSettings.Height = 850;
+
+            // Spire.PDF to convert XLSX to PDF, I read it has limited functionality (total pages, rows, etc...).
+            PdfConverter pdfConverter = new PdfConverter(workbook);
+            PdfConverterSettings settings = new PdfConverterSettings();
+            settings.TemplateDocument = pdfDocument;
+            pdfDocument = pdfConverter.Convert(settings);
+            pdfDocument.SaveToFile(outputDir + "SAMPLE.PDF");
+            System.Diagnostics.Process.Start(outputDir + "sample.pdf");
+
+        }   
+        
+
+
+    }
+}
