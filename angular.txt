@@ -1,0 +1,25 @@
+install vs code
+install node js
+install angular    cmd > npm install -g @angular/cli
+install firebase dependencies		npm install firebase-tools -g
+
+1. create directory
+2. extract the file
+3. alt f4 open with powershell it will open with vs code, then type code .
+4. ctrl ` to open terminal
+5. npm i  ... short for npm install
+6. ng serve --o to run on the browser
+
+Umbraco
+
+cannot crawls from dynamic content
+pre boot js allow users to interact while loading angular
+pre boot records the actions, it will act after loading
+
+richpreview
+
+run the server side
+1. go to dist cd dist
+2. node server.js
+
+developers.facebook.com/tools/debug/sharing
